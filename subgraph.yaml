@@ -1,0 +1,38 @@
+specVersion: 0.0.1
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CoffeeBatch
+    network: xdai
+    source:
+      address: "0xeCfaAE58487B64d777cDc8fb9f9e3B154f5563F1"
+      abi: CoffeeBatch
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.2
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - OwnershipTransferred
+        - ReceivedChild
+        - SetMinter
+        - Transfer
+      abis:
+        - name: CoffeeBatch
+          file: ./abis/CoffeeBatch.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: ReceivedChild(indexed address,indexed uint256,indexed address,uint256)
+          handler: handleReceivedChild
+        - event: SetMinter(indexed address,indexed address,bool)
+          handler: handleSetMinter
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/mapping.ts
