@@ -1,75 +1,29 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import {
-  CoffeeBatch,
-  Approval,
-  ApprovalForAll,
-  OwnershipTransferred,
-  ReceivedChild,
-  SetMinter,
   Transfer
 } from "../generated/CoffeeBatch/CoffeeBatch"
-import { ExampleEntity } from "../generated/schema"
+import { CoffeeBatch, OwnerBalance } from "../generated/schema"
 
-export function handleApproval(event: Approval): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
+export function handleTransfer(event: Transfer): void {
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+  if (event.params.from === Address.fromString(ZERO_ADDRESS)) {
+    let owner = event.params.to.toHexString();
+    let coffeeBatch = CoffeeBatch.load(event.params.id.toString());
+    if (coffeeBatch !== null) {
+      coffeeBatch.id = event.params.id.toString();
+      coffeeBatch.owner = owner;
+    }
+    coffeeBatch.save()
+
+    let ownerBalance = OwnerBalance.load(event.params.to.toHexString());
+    if (ownerBalance === null) {
+      ownerBalance.id = owner;
+      ownerBalance.balance = 1;
+    } else {
+      ownerBalance.balance = ownerBalance.balance + 1;
+    }
+    ownerBalance.save();
   }
-
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
-
-  // Entity fields can be set based on event parameters
-  entity.owner = event.params.owner
-  entity.spender = event.params.spender
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.balanceOf(...)
-  // - contract.getApproved(...)
-  // - contract.isApprovedForAll(...)
-  // - contract.minters(...)
-  // - contract.name(...)
-  // - contract.onERC721Received(...)
-  // - contract.owner(...)
-  // - contract.ownerOf(...)
-  // - contract.ownerOfChild(...)
-  // - contract.rootOwnerOfChild(...)
-  // - contract.supportsInterface(...)
-  // - contract.symbol(...)
-  // - contract.tokenURI(...)
 }
-
-export function handleApprovalForAll(event: ApprovalForAll): void {}
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
-
-export function handleReceivedChild(event: ReceivedChild): void {}
-
-export function handleSetMinter(event: SetMinter): void {}
-
-export function handleTransfer(event: Transfer): void {}

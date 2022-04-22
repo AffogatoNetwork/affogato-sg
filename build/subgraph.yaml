@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: CoffeeBatch
@@ -17,8 +17,8 @@ dataSources:
         - OwnerBalance
       abis:
         - name: CoffeeBatch
-          file: ./abis/CoffeeBatch.json
+          file: CoffeeBatch/abis/CoffeeBatch.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
-      file: ./src/mapping.ts
+      file: CoffeeBatch/CoffeeBatch.wasm
